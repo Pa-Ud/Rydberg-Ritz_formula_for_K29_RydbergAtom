@@ -61,3 +61,41 @@ def RRF(n,L,j,a,b,c,d,e,Ei):
         EnLr = 0*Ei0 + 1*(Ei[i]+288.6) - R39K/divider
         EnL.append(EnLr) 
     return EnL
+    
+    ######################################################################################
+    filename = 'Rydberg-RitzFormulaParameters.csv'
+clight = 299792458
+L,j,a,b,c,d,e,Ei = readParameters(filename)
+a4PhalfF2 = 389286058.716+288.6+20.8 #MHz
+Lstate = ['S','D','P']
+jstate = [[0.5], [1.5,2.5], [0.5,1.5]]
+Rydstate, Rydfreq, Rydwave = [],[],[]
+nStates = np.linspace(55,75,21)
+nStates = np.append(nStates, np.linspace(115,130,16) )
+print(nStates)
+for v in range(0,len(Lstate)):
+    lstate = Lstate[v]
+    for q in nStates:#range(50,130):
+        q = int(q)
+        Ans = RRF(q,lstate,j,a,b,c,d,e,Ei)
+        for u in range(0,len(Ans)):
+            freq = (Ans[u] - a4PhalfF2)*1e-6   
+            #stringOUT = str(q)+lstate+'(j='+str(int(2*jstate[v][u]))+'/2) '+'%10.7f' %energy 
+            #print(stringOUT) #Use Rydberg-Ritz formula to calculate 
+            Rydstate.append(str(q)+lstate+' (j='+str(int(2*jstate[v][u]))+'/2)')
+            bluefreq = '%10.7f' %freq
+            Rydfreq.append(bluefreq)
+            bluewave = '%10.7f' %(1e-3*clight/freq)
+            Rydwave.append(bluewave)
+            
+sortA, Rydstate = zip(*sorted(zip(Rydfreq, Rydstate)))
+Rydfreq, Rydwave = zip(*sorted(zip(Rydfreq, Rydwave)))
+#for w in range(0,len(Rydfreq)):
+    #print(Rydstate[w],Rydwave[w],Rydfreq[w])
+with open('RydbergRitzCalculation.csv','w') as f1:
+    writer=csv.writer(f1, delimiter=',',lineterminator='\n',)
+    for w in range(0,len(Rydfreq)):
+        row = Rydstate[w],Rydwave[w],Rydfreq[w]
+        writer.writerow(row)    
+        
+  ##############################################################################################
